@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../providers/statistics_provider.dart';
 
 class StatisticsScreen extends ConsumerWidget {
@@ -12,7 +10,7 @@ class StatisticsScreen extends ConsumerWidget {
     final statsAsync = ref.watch(statisticsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Statistics',),
+      appBar: AppBar(title: const Text('Statistics',),
       elevation: 0,
       ),
 
@@ -22,31 +20,31 @@ class StatisticsScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 48, color: Colors.red,),
-                SizedBox(height: 16,),
+                const Icon(Icons.error_outline, size: 48, color: Colors.red,),
+                const SizedBox(height: 16,),
                 Text('Error: $error'),
               ],
             ),
           ),
-          loading: () => Center(child: CircularProgressIndicator(),)),
+          loading: () => const Center(child: CircularProgressIndicator(),)),
     );
   }
 }
 
 Widget _buildStatsContent(BuildContext context, ReadingStats stats) {
   return SingleChildScrollView(
-    padding: EdgeInsets.all(16),
+    padding: const EdgeInsets.all(16),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildProgressCard(context, stats),
-        SizedBox(height: 16,),
+        const SizedBox(height: 16,),
 
         _buildBooksStatusCard(context,stats),
-        SizedBox(height: 16,),
+        const SizedBox(height: 16,),
 
         _buildReadingVolumeCard(context, stats),
-        SizedBox(height: 16,),
+        const SizedBox(height: 16,),
 
         _buildQuickStatsGrid(context, stats),
       ],
@@ -143,7 +141,7 @@ Widget _buildBooksStatusCard(BuildContext context, ReadingStats stats) {
   return Card(
     elevation: 2,
     child: Padding(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -153,7 +151,7 @@ Widget _buildBooksStatusCard(BuildContext context, ReadingStats stats) {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 20,),
+          const SizedBox(height: 20,),
           _buildStatsRow(
             context,
             'Total Books',
@@ -161,28 +159,28 @@ Widget _buildBooksStatusCard(BuildContext context, ReadingStats stats) {
             Icons.library_books,
             Colors.purple,
           ),
-          Divider(height: 24,),
+          const Divider(height: 24,),
           _buildStatsRow(
             context,
             'Currently Reading',
             stats.booksReading.toString(),
-            Icons.library_books,
+            Icons.bookmark,
             Colors.purple,
           ),
-          Divider(height: 24,),
+          const Divider(height: 24,),
           _buildStatsRow(
             context,
             'Completed',
             stats.booksCompleted.toString(),
-            Icons.library_books,
+            Icons.check_circle,
             Colors.purple,
           ),
-          Divider(height: 24,),
+          const Divider(height: 24,),
           _buildStatsRow(
             context,
             'Want to Read',
             stats.booksWantToRead.toString(),
-            Icons.library_books,
+            Icons.next_plan,
             Colors.purple,
           ),
         ],
@@ -195,7 +193,7 @@ Widget _buildBooksStatusCard(BuildContext context, ReadingStats stats) {
 Widget _buildReadingVolumeCard(BuildContext context, ReadingStats stats) {
   return Card(
     elevation: 2,
-    child: Padding(padding: EdgeInsets.all(20),
+    child: Padding(padding: const EdgeInsets.all(20),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -205,7 +203,7 @@ Widget _buildReadingVolumeCard(BuildContext context, ReadingStats stats) {
             fontWeight: FontWeight.bold
           ),
         ),
-        SizedBox(height: 20,),
+        const SizedBox(height: 20,),
         _buildStatsRow(
           context,
           'Pages Read',
@@ -213,7 +211,7 @@ Widget _buildReadingVolumeCard(BuildContext context, ReadingStats stats) {
           Icons.visibility,
           Colors.teal,
         ),
-        Divider(height: 24,),
+        const Divider(height: 24,),
         _buildStatsRow(
           context,
           'Total Pages',
@@ -221,7 +219,7 @@ Widget _buildReadingVolumeCard(BuildContext context, ReadingStats stats) {
           Icons.auto_stories,
           Colors.indigo,
         ),
-        Divider(height: 24,),
+        const Divider(height: 24,),
         _buildStatsRow(
           context,
           'Pages Remaining',
@@ -246,7 +244,7 @@ Widget _buildQuickStatsGrid(BuildContext context, ReadingStats stats) {
         Icons.auto_graph,
         Colors.cyan
       )),
-      SizedBox(width: 12,),
+      const SizedBox(width: 12,),
       Expanded(child: _buildQuickStatsCard(
         context,
         'In Progress',
@@ -267,18 +265,18 @@ Color color
 ) {
   return Card(
     elevation: 2,
-    child: Padding(padding: EdgeInsets.all(16),
+    child: Padding(padding: const EdgeInsets.all(16),
     child: Column(
       children: [
         Container(
-          padding: EdgeInsets.all(12),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(22),
           ),
           child: Icon(icon, color: color, size: 28,),
         ),
-        SizedBox(height: 12,),
+        const SizedBox(height: 12,),
         Text(
           value,
           style: TextStyle(
@@ -287,7 +285,7 @@ Color color
             color: color,
           ),
         ),
-        SizedBox(height: 4,),
+        const SizedBox(height: 4,),
         Text(
           label,
           textAlign: TextAlign.center,
@@ -312,19 +310,19 @@ Widget _buildStatsRow(
   return Row(
     children: [
       Container(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(icon, color: color, size: 24,),
       ),
-      SizedBox(
+      const SizedBox(
         width: 16,
       ),
       Expanded(child: Text(
         label,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
