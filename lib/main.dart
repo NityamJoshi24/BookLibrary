@@ -1,7 +1,7 @@
 import 'package:book_library/providers/book_provider.dart';
 import 'package:book_library/providers/filter_providers.dart';
 import 'package:book_library/screens/book_details_screen.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:book_library/screens/statistics_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,6 +83,9 @@ class BookListScreen extends ConsumerWidget {
             loading: () => SizedBox.shrink(),
             error: (err, stack) => SizedBox.shrink()
           ),
+          IconButton(onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => StatisticsScreen(),),);
+          }, icon: Icon(Icons.bar_chart))
         ],
       ),
       body: booksAsync.when(
