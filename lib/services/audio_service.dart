@@ -15,14 +15,12 @@ class AudioService {
   static const Duration _maxRecordingDuration = Duration(minutes: 1);
 
 
-  /* ===================== PERMISSIONS ===================== */
 
   Future<bool> checkPermission() async {
     final status = await Permission.microphone.request();
     return status.isGranted;
   }
 
-  /* ===================== RECORDING ===================== */
 
   Future<void> startRecording(String bookId) async {
     if (_isRecording) return;
@@ -37,11 +35,9 @@ class AudioService {
     final dir = await getApplicationDocumentsDirectory();
     final ts = DateTime.now().millisecondsSinceEpoch;
 
-    // Sanitize bookId so the file name contains only safe characters
     final safeBookId =
         bookId.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
 
-    // Use AAC in an .m4a container – this is widely supported by Android's MediaPlayer
     final path = '${dir.path}/audio_${safeBookId}_$ts.m4a';
 
     await _recorder.start(
@@ -81,7 +77,6 @@ class AudioService {
 
   bool get isRecording => _isRecording;
 
-  /* ===================== PLAYBACK ===================== */
 
   Stream<PlayerState> get playerState => _player.onPlayerStateChanged;
   Stream<Duration> get positionStream => _player.onPositionChanged;
@@ -120,12 +115,10 @@ class AudioService {
   Future<void> stop() async => _player.stop();
   Future<void> seek(Duration d) async => _player.seek(d);
 
-  /* ===================== DURATION ===================== */
 
   Future<Duration?> getDuration(String path) async {
     if (_isRecording) return null;
 
-    // Ignore legacy/unsupported formats (e.g. old .wav recordings)
     if (!path.toLowerCase().endsWith('.m4a')) {
       print('Skipping duration read for unsupported format: $path');
       return null;
@@ -148,7 +141,6 @@ class AudioService {
     }
   }
 
-  /* ===================== DELETE ===================== */
 
   Future<void> deleteAudio(String path) async {
     await stop();
@@ -160,7 +152,6 @@ class AudioService {
     }
   }
 
-  /* ===================== CLEANUP ===================== */
 
   void dispose() {
     _recordingTimer?.cancel();
