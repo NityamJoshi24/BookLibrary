@@ -1,14 +1,75 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/book.dart';
 import '../repository/book_repository.dart';
+import '../services/audio_service.dart';
 
 class BookNotifier extends StateNotifier<AsyncValue<List<Book>>> {
 
   final BookRepository _repository;
+  final AudioService _audioService = AudioService();
+
 
   BookNotifier(this._repository) : super(const AsyncValue.loading()){
     _loadBooks();
 }
+
+  Future<void> startRecordingNote(String bookId) async {
+    try{
+      await _audioService.startRecording(bookId);
+    } catch (e) {
+      print('Error start recording: $e');
+      throw Exception('Failed to start recording');
+    }
+  }
+
+  Future<void> stopRecordingAndSave(String bookId) async {
+    try{
+      final audioPath = await _audioService.stopRecording();
+
+      if(audioPath != null) {
+        state.whenData((books) async {
+          final updatedBooks = [
+            for(final book in books)
+              if(book.id == bookId)
+                book.copyWith(audioNotePath: audioPath)
+              else
+                book,
+          ];
+
+          state = AsyncValue.data(updatedBooks);
+          await _saveBooks(updatedBooks);
+        });
+      }
+    } catch (e) {
+      print('Error stopping recording: $e');
+    }
+  }
+
+  bool get isRecording => _audioService.isRecording;
+
+  Future<void> deleteAudioNote(String bookId) async {
+    state.whenData((books) async {
+      final book = books.firstWhere((b) => b.id == bookId);
+
+      if(book.audioNotePath != null) {
+        await _audioService.deleteAudio(book.audioNotePath!);
+
+        final updatedBooks = [
+          for(final b in books)
+            if(b.id == bookId)
+              b.copyWith(audioNotePath: null)
+            else
+              b
+        ];
+
+        state = AsyncValue.data(updatedBooks);
+        await _saveBooks(updatedBooks);
+      }
+    });
+  }
+
+  AudioService get audioService => _audioService;
+
 
   Future<void> _loadBooks() async {
     try{
@@ -19,7 +80,7 @@ class BookNotifier extends StateNotifier<AsyncValue<List<Book>>> {
 }
 }
 
-  Future<void> _savedBooks(List<Book> books) async {
+  Future<void> _saveBooks(List<Book> books) async {
     await _repository.saveBooks(books);
 }
 
@@ -39,7 +100,7 @@ class BookNotifier extends StateNotifier<AsyncValue<List<Book>>> {
       );
       final updatedBooks = [...books, newBook];
       state = AsyncValue.data(updatedBooks);
-      await _savedBooks(updatedBooks);
+      await _saveBooks(updatedBooks);
     });
   }
 
@@ -53,7 +114,7 @@ class BookNotifier extends StateNotifier<AsyncValue<List<Book>>> {
             book
       ];
       state = AsyncValue.data(updatedBooks);
-      await _savedBooks(updatedBooks);
+      await _saveBooks(updatedBooks);
     });
   }
 
@@ -67,7 +128,7 @@ class BookNotifier extends StateNotifier<AsyncValue<List<Book>>> {
             book
       ];
       state = AsyncValue.data(updatedBooks);
-      await _savedBooks(updatedBooks);
+      await _saveBooks(updatedBooks);
     });
   }
 
@@ -75,7 +136,7 @@ class BookNotifier extends StateNotifier<AsyncValue<List<Book>>> {
     state.whenData((books) async {
       final updatedBooks = books.where((book) => book.id != bookId).toList();
       state = AsyncValue.data(updatedBooks);
-      await _savedBooks(updatedBooks);
+      await _saveBooks(updatedBooks);
     });
   }
 }

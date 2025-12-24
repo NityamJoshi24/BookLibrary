@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../widgets/audio_player_widget.dart';
 import '../models/book.dart';
 import '../providers/book_provider.dart';
 
@@ -32,6 +32,134 @@ class BookDetailsScreen extends ConsumerWidget{
         appBar: AppBar(title: const Text('Book Details')),
         body: Center(child: Text('Error: $error')),
       ),
+    );
+  }
+
+  Widget _buildAudioNoteCard(BuildContext context, WidgetRef ref, Book currentBook) {
+    return Card(
+      child: Padding(padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.mic, color: Colors.blue,),
+              SizedBox(width: 8,),
+              Text('Audio Note',
+              style: Theme.of(context).textTheme.titleMedium,
+              )
+            ],
+          ),
+          SizedBox(height: 16,),
+
+          if(currentBook.hasAudioNote)
+            AudioPlayerWidget(
+                audioPath: currentBook.audioNotePath!,
+                audioService: ref.read(bookProvider.notifier).audioService,
+              onDelete: () {
+                  ref.read(bookProvider.notifier).deleteAudioNote(currentBook.id);
+              },
+            )
+          else
+            Center(
+              child: Column(
+                children: [
+                  Text('No audio note recorded yet',
+                  style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 16,),
+                  ElevatedButton.icon(onPressed: () => _showRecordDialog(context, ref, currentBook),
+                    icon: Icon(Icons.mic),
+                    label: Text('Record Audio Note'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      )
+                    ),
+                  )
+                ],
+              ),
+            )
+        ],
+      ),
+      ),
+    );
+  }
+
+  void _showRecordDialog(BuildContext context, WidgetRef ref, Book book) async {
+    bool isRecording = false;
+
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => StatefulBuilder(
+            builder: (context, setState) => AlertDialog(
+              title: Row(
+                children: [
+                  Icon(
+                    isRecording ? Icons.mic : Icons.mic_none,
+                    color: isRecording ? Colors.red : Colors.grey,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(isRecording ? 'Recording...' : 'Record Audio Note'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isRecording)
+                    Column(
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Recording in progress...',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Tap Stop when finished',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    )
+                  else
+                    const Text('Tap Start to begin recording your audio note'),
+                ],
+              ),
+              actions: [
+                if(!isRecording)
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('Cancel')),
+                ElevatedButton.icon(
+                    onPressed: () async {
+                      if(!isRecording) {
+                        try{
+                          await ref.read(bookProvider.notifier).startRecordingNote(book.id);
+                          setState(() {
+                            isRecording = true;
+                          });
+                        } catch (e) {
+                          Navigator.pop(dialogContext);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                        }
+                      } else {
+                        await ref.read(bookProvider.notifier).stopRecordingAndSave(book.id);
+                        Navigator.pop(dialogContext);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Audio note saved')));
+                      }
+                    },
+                    icon: Icon(isRecording ? Icons.stop : Icons.fiber_manual_record),
+                    label: Text(isRecording ? 'Stop' : 'Start Recording'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isRecording ? Colors.red : Colors.blue,
+                    ),
+                )
+              ],
+            ),
+        ),
     );
   }
 
@@ -110,7 +238,10 @@ class BookDetailsScreen extends ConsumerWidget{
                           onPressed: () => _showUpdateProgressDialog(context, ref, currentBook),
                           icon: Icon(Icons.edit),
                           label: Text('Update Progress')),
-                    )
+                    ),
+
+                    SizedBox(height: 16,),
+                    _buildAudioNoteCard(context, ref, currentBook),
                   ],
                 ),
               ),

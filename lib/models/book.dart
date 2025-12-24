@@ -5,12 +5,15 @@ enum BookStatus{
 }
 
 class Book{
+  // Sentinel object to distinguish between "no change" and "explicit null"
+  static const Object _audioPathSentinel = Object();
   final String id;
   final String title;
   final String author;
   final int totalPages;
   final int currentPage;
   final BookStatus status;
+  final String? audioNotePath;
 
   Book({
     required this.title,
@@ -19,6 +22,7 @@ class Book{
     required this.id,
     required this.status,
     required this.totalPages,
+    this.audioNotePath,
   });
 
   Book copyWith({
@@ -28,6 +32,7 @@ class Book{
     int? totalPages,
     int? currentPage,
     BookStatus? status,
+    Object? audioNotePath = _audioPathSentinel,
   }) {
     return Book(
       id: id ?? this.id,
@@ -36,6 +41,9 @@ class Book{
       totalPages: totalPages ?? this.totalPages,
       currentPage: currentPage ?? this.currentPage,
       status: status ?? this.status,
+      audioNotePath: identical(audioNotePath, _audioPathSentinel)
+          ? this.audioNotePath
+          : audioNotePath as String?,
     );
   }
 
@@ -43,4 +51,6 @@ class Book{
     if(totalPages == 0) return 0;
     return (currentPage/totalPages*100).clamp(0, 100);
   }
+
+  bool get hasAudioNote => audioNotePath != null && audioNotePath!.isNotEmpty;
 }

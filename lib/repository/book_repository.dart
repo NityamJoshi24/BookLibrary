@@ -17,6 +17,7 @@ class BookRepository{
       'totalPages': book.totalPages,
       'currentPage': book.currentPage,
       'status': book.status.name,
+      'audioNotePath': book.audioNotePath,
     }).toList();
 
     await prefs.setString(_booksKey, jsonEncode(booksJson));
@@ -51,7 +52,14 @@ class BookRepository{
             status = BookStatus.wantToRead;
         }
 
-        return Book(title: json['title'], author: json['author'], currentPage: json['currentPage'], id: json['id'], status: status, totalPages: json['totalPages']);
+        return Book(
+            title: json['title'],
+            author: json['author'],
+            currentPage: json['currentPage'],
+            id: json['id'],
+            status: status,
+            totalPages: json['totalPages'],
+            audioNotePath: json['audioNotePath']);
       }).toList();
       
       print('Loaded ${books.length} books from storage');
