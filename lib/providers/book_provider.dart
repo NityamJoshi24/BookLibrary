@@ -1,16 +1,21 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/book.dart';
 import '../repository/book_repository.dart';
 import '../services/audio_service.dart';
 
 class BookNotifier extends StateNotifier<AsyncValue<List<Book>>> {
-
+  final recordingLimitReached = ValueNotifier<bool>(false);
   final BookRepository _repository;
   final AudioService _audioService = AudioService();
 
 
   BookNotifier(this._repository) : super(const AsyncValue.loading()){
     _loadBooks();
+
+    _audioService.onRecordingLimitReached = () {
+      recordingLimitReached.value = true;
+    };
 }
 
   Future<void> startRecordingNote(String bookId) async {

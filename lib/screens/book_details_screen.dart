@@ -89,52 +89,71 @@ class BookDetailsScreen extends ConsumerWidget{
 
   void _showRecordDialog(BuildContext context, WidgetRef ref, Book book) async {
     bool isRecording = false;
+    final notifier = ref.read(bookProvider.notifier);
 
     await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (dialogContext) => StatefulBuilder(
-            builder: (context, setState) => AlertDialog(
-              title: Row(
-                children: [
-                  Icon(
-                    isRecording ? Icons.mic : Icons.mic_none,
-                    color: isRecording ? Colors.red : Colors.grey,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(isRecording ? 'Recording...' : 'Record Audio Note'),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isRecording)
-                    Column(
-                      children: [
-                        const CircularProgressIndicator(),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Recording in progress...',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Tap Stop when finished',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    )
-                  else
-                    const Text('Tap Start to begin recording your audio note'),
-                ],
-              ),
-              actions: [
-                if(!isRecording)
-                  TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('Cancel')),
-                ElevatedButton.icon(
+            builder: (context, setState) {
+              notifier.recordingLimitReached.addListener(() async {
+                if(!isRecording) return;
+
+                isRecording = false;
+
+                await notifier.stopRecordingAndSave(book.id);
+
+                if(Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Recording limit (1 minute) reached')),
+                );
+                notifier.recordingLimitReached.value = false;
+              });
+              return AlertDialog(
+                title: Row(
+                  children: [
+                    Icon(
+                      isRecording ? Icons.mic : Icons.mic_none,
+                      color: isRecording ? Colors.red : Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(isRecording ? 'Recording...' : 'Record Audio Note'),
+                  ],
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isRecording)
+                      Column(
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Recording in progress...',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Recording will auto-stop after 1 minute',
+                            style: TextStyle(fontSize: 12,),
+                          ),
+                        ],
+                      )
+                    else
+                      const Text('Tap Start to begin recording your audio note'),
+                  ],
+                ),
+                actions: [
+                  if(!isRecording)
+                    TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('Cancel')),
+                  ElevatedButton.icon(
                     onPressed: () async {
+                      if(notifier.recordingLimitReached.value) return;
                       if(!isRecording) {
                         try{
                           await ref.read(bookProvider.notifier).startRecordingNote(book.id);
@@ -156,9 +175,10 @@ class BookDetailsScreen extends ConsumerWidget{
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isRecording ? Colors.red : Colors.blue,
                     ),
-                )
-              ],
-            ),
+                  )
+                ],
+              );
+            }
         ),
     );
   }

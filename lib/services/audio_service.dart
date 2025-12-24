@@ -1,6 +1,7 @@
 import 'dart:io';
-
+import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
@@ -8,8 +9,11 @@ import 'package:record/record.dart';
 class AudioService {
   final AudioRecorder _recorder = AudioRecorder();
   final AudioPlayer _player = AudioPlayer();
-
   bool _isRecording = false;
+  Timer? _recordingTimer;
+  VoidCallback? onRecordingLimitReached;
+  static const Duration _maxRecordingDuration = Duration(minutes: 1);
+
 
   /* ===================== PERMISSIONS ===================== */
 
@@ -51,16 +55,24 @@ class AudioService {
     );
 
     _isRecording = true;
+    _recordingTimer?.cancel();
+    _recordingTimer = Timer(_maxRecordingDuration, () async {
+      if(_isRecording) {
+        await stopRecording();
+        onRecordingLimitReached?.call();
+      }
+    });
     print('Recording started: $path');
   }
 
   Future<String?> stopRecording() async {
     if (!_isRecording) return null;
 
+    _recordingTimer?.cancel();
+    _recordingTimer = null;
     final path = await _recorder.stop();
     _isRecording = false;
 
-    // 🔴 VERY IMPORTANT: allow file to flush
     await Future.delayed(const Duration(milliseconds: 300));
 
     print('Recording stopped: $path');
@@ -93,7 +105,6 @@ class AudioService {
       await _player.stop();
       await _player.setReleaseMode(ReleaseMode.stop);
 
-      // 🔴 KEY FIX: delay before setting source
       await Future.delayed(const Duration(milliseconds: 200));
 
       await _player.setSource(DeviceFileSource(path));
@@ -152,6 +163,7 @@ class AudioService {
   /* ===================== CLEANUP ===================== */
 
   void dispose() {
+    _recordingTimer?.cancel();
     _recorder.dispose();
     _player.dispose();
   }

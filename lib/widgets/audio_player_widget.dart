@@ -100,14 +100,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Audio Note',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
                       Text(
                         'Duration ${_fmt(duration)}',
                         style: TextStyle(
