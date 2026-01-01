@@ -9,9 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'models/book.dart';
 
 void main() {
-  runApp(
-    ProviderScope(child: MyApp(),)
-  );
+  runApp(ProviderScope(
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -36,10 +36,8 @@ class BookListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final booksAsync = ref.watch(filteredBooksProvider);
     final currentFilter = ref.watch(bookFilterProvider);
-
 
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +45,9 @@ class BookListScreen extends ConsumerWidget {
         actions: [
           PopupMenuButton<FilterOption>(
             icon: Icon(
-              currentFilter == FilterOption.all ? Icons.filter_list : Icons.filter_list_alt,
+              currentFilter == FilterOption.all
+                  ? Icons.filter_list
+                  : Icons.filter_list_alt,
               color: currentFilter == FilterOption.all ? null : Colors.blue,
             ),
             onSelected: (filter) {
@@ -73,20 +73,27 @@ class BookListScreen extends ConsumerWidget {
             ],
           ),
           booksAsync.when(
-            data: (books) => Center(
-              child: Padding(padding: EdgeInsets.only(right: 16),
-                child: Text(
-                  '${books.length} books',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-            loading: () => SizedBox.shrink(),
-            error: (err, stack) => SizedBox.shrink()
-          ),
-          IconButton(onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => StatisticsScreen(),),);
-          }, icon: Icon(Icons.bar_chart))
+              data: (books) => Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 16),
+                      child: Text(
+                        '${books.length} books',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+              loading: () => SizedBox.shrink(),
+              error: (err, stack) => SizedBox.shrink()),
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StatisticsScreen(),
+                  ),
+                );
+              },
+              icon: Icon(Icons.bar_chart))
         ],
       ),
       body: booksAsync.when(
@@ -108,7 +115,8 @@ class BookListScreen extends ConsumerWidget {
                 margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
                   title: Text(book.title),
-                  subtitle: Text('by ${book.author} - ${book.totalPages} pages'),
+                  subtitle:
+                      Text('by ${book.author} - ${book.totalPages} pages'),
                   trailing: _buildStatusChip(book.status),
                   onTap: () {
                     Navigator.push(
@@ -131,7 +139,6 @@ class BookListScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddBookDialog(context, ref),
         child: Icon(Icons.add),
-
       ),
     );
   }
@@ -141,7 +148,7 @@ Widget _buildStatusChip(BookStatus status) {
   Color color;
   String label;
 
-  switch(status) {
+  switch (status) {
     case BookStatus.reading:
       color = Colors.blue;
       label = 'Reading';
@@ -156,66 +163,74 @@ Widget _buildStatusChip(BookStatus status) {
       break;
   }
 
-  return Chip(label: Text(label, style: TextStyle(fontSize: 22),),
-  backgroundColor: color.withOpacity(0.2),
+  return Chip(
+    label: Text(
+      label,
+      style: TextStyle(fontSize: 22),
+    ),
+    backgroundColor: color.withOpacity(0.2),
     side: BorderSide(color: color),
   );
 }
 
-void _showAddBookDialog(BuildContext context, WidgetRef ref){
+void _showAddBookDialog(BuildContext context, WidgetRef ref) {
   final titleController = TextEditingController();
   final authorController = TextEditingController();
   final pagesController = TextEditingController();
 
-  showDialog(context: context, builder: (context) => AlertDialog(
-    title: Text('Add New Book'),
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextField(
-          controller: titleController,
-          decoration: InputDecoration(
-            labelText: 'Book Title',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        SizedBox(height: 16),
-        TextField(
-          controller: authorController,
-          decoration: InputDecoration(
-            labelText: 'Author Name',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        SizedBox(height: 16),
-        TextField(
-          controller: pagesController,
-          decoration: InputDecoration(
-            labelText: 'Total Pages',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.numberWithOptions(
-            decimal: false,
-            signed: false
-          ),
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly
-          ],
-        )
-      ],
-    ),
-    actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
-      FilledButton(onPressed: () {
-        if(titleController.text.isNotEmpty && authorController.text.isNotEmpty && pagesController.text.isNotEmpty) {
-          ref.read(bookProvider.notifier).addBook(
-            title: titleController.text,
-            author: authorController.text,
-            totalPages: int.parse(pagesController.text),
-          );
-          Navigator.pop(context);
-        }
-      }, child: Text('Add Book'))
-    ],
-  ));
+  showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+            title: Text('Add New Book'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Book Title',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: authorController,
+                  decoration: InputDecoration(
+                    labelText: 'Author Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: pagesController,
+                  decoration: InputDecoration(
+                    labelText: 'Total Pages',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.numberWithOptions(
+                      decimal: false, signed: false),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                )
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel')),
+              FilledButton(
+                  onPressed: () {
+                    if (titleController.text.isNotEmpty &&
+                        authorController.text.isNotEmpty &&
+                        pagesController.text.isNotEmpty) {
+                      ref.read(bookProvider.notifier).addBook(
+                            title: titleController.text,
+                            author: authorController.text,
+                            totalPages: int.parse(pagesController.text),
+                          );
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text('Add Book'))
+            ],
+          ));
 }

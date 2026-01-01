@@ -5,7 +5,6 @@ enum BookStatus{
 }
 
 class Book{
-  // Sentinel object to distinguish between "no change" and "explicit null"
   static const Object _audioPathSentinel = Object();
   final String id;
   final String title;

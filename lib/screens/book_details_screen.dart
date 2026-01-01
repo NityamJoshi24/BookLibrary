@@ -205,8 +205,8 @@ class BookDetailsScreen extends ConsumerWidget{
             ),
             SizedBox(height: 8,),
             Text('by ${currentBook.author}',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.grey[300]
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.grey[800]
               ),
             ),
             SizedBox(height: 24,),
@@ -247,7 +247,7 @@ class BookDetailsScreen extends ConsumerWidget{
                     SizedBox(height: 8,),
                     Text('${currentBook.currentPage} / ${currentBook.totalPages} pages (${currentBook.progressPercentage.toStringAsFixed(1)}%)',
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Colors.grey[800],
                       ),
                     ),
                     SizedBox(height: 16,),

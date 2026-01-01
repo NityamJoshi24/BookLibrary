@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/book.dart';
 
-// Use a special "all" status
 enum FilterOption {
   all,
   wantToRead,
